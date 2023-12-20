@@ -1,0 +1,7 @@
+# ignore user pro files
+.vscode
+*.db
+*.mp4
+build/
+*.log
+*.exe
