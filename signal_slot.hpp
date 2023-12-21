@@ -36,7 +36,7 @@ public:
 
     void operator()(Args... args) {
         for (auto& si : slots_) {
-            std::cout << "post tid: " << getThreadId() << std::endl;
+            //std::cout << "post tid: " << getThreadId() << std::endl;
             si.post_task(std::move(args)...);
         }
     }    

@@ -38,7 +38,7 @@ public:
     }
 };
 
-//同步发送，槽函数再主线程里执行
+//同步，槽函数在主线程里执行
 class SyncSlot {
 public:
     SyncSlot() {}
@@ -53,8 +53,13 @@ public:
     void emit() {
         auto a1 = std::make_shared<TestStruct>();
         auto a2 = std::make_shared<TestStruct2>();
-        signal_0("fdafdasfas");
-        signal_1(a1, a2, 600);
+        for (int i =0; i < 100; ++i) {
+            if (i % 2 == 0 ) {
+                signal_0("singal_0_" + std::to_string(i));
+            } else {
+                signal_1(a1, a2, i);
+            }
+        }
     }
 
 public:
@@ -62,6 +67,7 @@ public:
     BaseSignal<std::shared_ptr<TestStruct>, std::shared_ptr<TestStruct2>, int>     signal_1;
 };  
 
+//异步，槽函数在自己线程里执行
 class AsyncSlot {
 public:
     AsyncSlot() {}
@@ -81,8 +87,13 @@ public:
     void emit() {
         auto a1 = std::make_shared<TestStruct>();
         auto a2 = std::make_shared<TestStruct2>();
-        signal_0("fdafdasfas");
-        signal_1(a1, a2, 600);
+        for (int i =0; i < 100; ++i) {
+            if (i % 2 == 0 ) {
+                signal_0("singal_0_" + std::to_string(i));
+            } else {
+                signal_1(a1, a2, i);
+            }
+        }
     }
 
 public:
@@ -94,18 +105,27 @@ public:
 int main() {
     std::cout << "main thread tid: " << getThreadId() << std::endl;
     CSApplication app;
-
-    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
-
+    
+    //同步测试
     SyncSlot ss;
     ss.set_signal();
+    SyncSlot ss1;
+    ss1.set_signal();    
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    ss1.emit();
     ss.emit();
 
+    std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+
+    //异步测试
     AsyncSlot as;
     as.set_signal();
-    as.emit();    
+    AsyncSlot as1;
+    as1.set_signal();
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));    
+    as.emit();
+    as1.emit();        
 
     app.exec();
-
     return 0;
 }
